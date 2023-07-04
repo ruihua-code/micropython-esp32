@@ -3,6 +3,7 @@ import network
 from zrh_response_json import ZrhResponseJson
 from zrh_wifi_html import html
 import ujson
+import machine
 from zrh_wifi_nvs import setWifiNVS
 
 resJson = ZrhResponseJson()
@@ -75,6 +76,7 @@ def doAp():
                             setWifiNVS(jsonParams['data']['ssid'],
                                        jsonParams['data']['password'])
                             resJson.success("wifi配置成功")
+                            machine.reset()
                         else:
                             resJson.success("成功")
                     else:
