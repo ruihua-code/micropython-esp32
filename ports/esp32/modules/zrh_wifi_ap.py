@@ -5,6 +5,8 @@ from zrh_wifi_html import html
 import ujson
 import machine
 from zrh_wifi_nvs import setWifiNVS
+from zrh_gpio import do_led
+import time
 
 resJson = ZrhResponseJson()
 text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
@@ -68,7 +70,7 @@ def doAp():
             elif request_method[0] == 'POST' or request_method[1] == '/cmd':
                 try:
                     jsonParams = ujson.loads(request_params)
-                    print("jsonParams type:", type(jsonParams))
+                    print("jsonParams cmd:", jsonParams['cmd'])
                     print("params json:", jsonParams)
                     # 检查接口关键key是否存在
                     if 'cmd' in jsonParams:
@@ -76,7 +78,13 @@ def doAp():
                             setWifiNVS(jsonParams['data']['ssid'],
                                        jsonParams['data']['password'])
                             resJson.success("wifi配置成功")
+                            client_socket.send(application_json)
+                            client_socket.send(resJson.json())
+                            client_socket.close()
+                            time.sleep(1)
                             machine.reset()
+                        elif jsonParams['cmd'] == 'ON_LED':
+                            do_led(int(jsonParams['data']))
                         else:
                             resJson.success("成功")
                     else:
