@@ -38,7 +38,7 @@ def doAp():
     print(ap.ifconfig())
 
     my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    my_socket.bind(('0.0.0.0', 8080))
+    my_socket.bind(('0.0.0.0', 80))
     my_socket.listen(5)
     while True:
         client_socket, _ = my_socket.accept()
