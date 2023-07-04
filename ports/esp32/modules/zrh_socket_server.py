@@ -1,54 +1,50 @@
 import socket
-import machine
+import ujson
+from zrh_response_json import ZrhResponseJson
+
+resJson = ZrhResponseJson()
+text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
+text_html = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
+application_json = 'HTTP/1.0 200 OK\r\nContent-type: application/json\r\n\r\n'
 
 
-def doSocket():
+def do_socket():
     print("启动socket服务")
-    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
+    my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    my_socket.bind(('0.0.0.0', 80))
+    my_socket.listen(5)
     while True:
-        cl, addr = s.accept()
-        print('client connected from', addr)
-        data = cl.recv(1024)
-
+        client_socket, _ = my_socket.accept()
+        data = client_socket.recv(1024)
         if len(data) > 0:
-            # print("全部数据:", data.decode("utf-8"))
-            # print("想要的路径:", data.decode("utf-8").split()[1])
-            path = data.decode("utf-8").split()[1]
-            # 路径作为参数
-            if ('temperature' in path):
-                # 获取温度和湿度
-                temp = getTemp()
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send(str(temp.decode().split(",")[0]))
-                showLedNumber(temp.decode().split(",")[0])
+            data_arr = data.decode().split("\r\n")
+            print("dataArr:", data_arr)
 
-            elif ('humidity' in path):
-                temp = getTemp()
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send(str(temp.decode().split(",")[1]))
-                showLedNumber(temp.decode().split(",")[1])
+            # 请求参数
+            request_params = data_arr[len(data_arr)-1]
+            print("params:", request_params)
 
-            elif ('onLight' in path):
-                onLight()
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send("ok")
+            request_method = data_arr[0].split(" ")
 
-            elif ('onWarmLight' in path):
-                onWarmLight()
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send("ok")
+            print("method:", request_method)
+            if len(request_method) == 1:
+                print("什么请求都没有")
+                return
+            elif request_method[0] == 'POST' or request_method[1] == '/cmd':
+                try:
+                    jsonParams = ujson.loads(request_params)
+                    print("jsonParams type:", type(jsonParams))
+                    print("params json:", jsonParams)
+                    resJson.success("成功")
+                except Exception as e:
+                    print("json error", e)
+                    resJson.error("失败,json参数错误")
+                client_socket.send(application_json)
+                client_socket.send(resJson.json())
 
-            elif ('closeLed' in path):
-                offall()
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send("ok")
-
-            elif ('resetDevice' in path):
-                cl.send('HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n')
-                cl.send("ok")
-                machine.reset()
-
-        cl.close()
+            else:
+                # 其他未知请求，全部拒绝
+                resJson.error("请求被拒绝")
+                client_socket.send(application_json)
+                client_socket.send(resJson.json())
+            client_socket.close()
