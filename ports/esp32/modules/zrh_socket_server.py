@@ -1,6 +1,7 @@
 import socket
 import ujson
 from zrh_response_json import ZrhResponseJson
+from zrh_gpio import do_led
 
 resJson = ZrhResponseJson()
 text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
@@ -33,9 +34,14 @@ def do_socket():
             elif request_method[0] == 'POST' or request_method[1] == '/cmd':
                 try:
                     jsonParams = ujson.loads(request_params)
-                    print("jsonParams type:", type(jsonParams))
+                    print("jsonParams cmd:", jsonParams['cmd'])
                     print("params json:", jsonParams)
-                    resJson.success("成功")
+
+                    if jsonParams['cmd'] == 'ON_LED':
+                        do_led(int(jsonParams['data']))
+                        resJson.success("成功")
+                    else:
+                        resJson.error("没有对应接口操作")
                 except Exception as e:
                     print("json error", e)
                     resJson.error("失败,json参数错误")

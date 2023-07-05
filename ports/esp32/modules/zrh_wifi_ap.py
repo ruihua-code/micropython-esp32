@@ -5,7 +5,6 @@ from zrh_wifi_html import html
 import ujson
 import machine
 from zrh_wifi_nvs import setWifiNVS
-from zrh_gpio import do_led
 import time
 
 resJson = ZrhResponseJson()
@@ -82,9 +81,7 @@ def doAp():
                             client_socket.send(resJson.json())
                             client_socket.close()
                             time.sleep(1)
-                            machine.reset()
-                        elif jsonParams['cmd'] == 'ON_LED':
-                            do_led(int(jsonParams['data']))
+                            machine.reset()                        
                         else:
                             resJson.success("成功")
                     else:
