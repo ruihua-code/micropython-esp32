@@ -2,6 +2,7 @@ import socket
 import ujson
 from zrh_response_json import ZrhResponseJson
 from zrh_gpio import do_led
+import zrh_thread_var
 
 resJson = ZrhResponseJson()
 text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
@@ -18,28 +19,24 @@ def do_socket():
         client_socket, _ = my_socket.accept()
         data = client_socket.recv(1024)
         if len(data) > 0:
-            data_arr = data.decode().split("\r\n")
-            print("dataArr:", data_arr)
+            data_arr = data.decode().split("\r\n")            
 
             # 请求参数
-            request_params = data_arr[len(data_arr)-1]
-            print("params:", request_params)
-
-            request_method = data_arr[0].split(" ")
-
-            print("method:", request_method)
+            request_params = data_arr[len(data_arr)-1]            
+            request_method = data_arr[0].split(" ")            
             if len(request_method) == 1:
                 print("什么请求都没有")
                 return
             elif request_method[0] == 'POST' or request_method[1] == '/cmd':
                 try:
-                    jsonParams = ujson.loads(request_params)
-                    print("jsonParams cmd:", jsonParams['cmd'])
+                    jsonParams = ujson.loads(request_params)                    
                     print("params json:", jsonParams)
 
                     if jsonParams['cmd'] == 'ON_LED':
-                        do_led(int(jsonParams['data']))
+                        do_led(jsonParams['data'])
                         resJson.success("成功")
+                    elif jsonParams['cmd'] == "ON_BLE":
+                        zrh_thread_var.ble_central_run = jsonParams['data']
                     else:
                         resJson.error("没有对应接口操作")
                 except Exception as e:
