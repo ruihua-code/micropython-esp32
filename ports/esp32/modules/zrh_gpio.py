@@ -1,6 +1,6 @@
 from machine import Pin
 
-led_pin_15 = Pin(15, Pin.OUT)
+led_pin_15 = Pin(15, Pin.OUT, Pin.PULL_UP)
 
 
 def do_led(value):

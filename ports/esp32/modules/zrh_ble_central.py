@@ -6,6 +6,8 @@ import time
 from micropython import const
 import zrh_thread_var
 from zrh_gpio import do_led
+import gc
+import micropython
 
 _IRQ_SCAN_RESULT = const(5)
 
@@ -38,7 +40,7 @@ def do_ble_central():
     # duration_ms 要无限期扫描，请将 *duration_ms* 设置为“0”。要停止扫描，请将 *duration_ms* 设置为“None”。
     # interval_us
     # window_us
-    bt.gap_scan(0, 5000000, 2000000)
+    bt.gap_scan(0, 2000000, 2000000)
     bt.irq(scan_callback)
 
     # 等待扫描完成
@@ -51,7 +53,9 @@ def do_ble_central():
     # bt.active(False)
 
     while True:
-        time.sleep(5)
+        time.sleep(2)
+        gc.collect()
+        print("mem_info:",micropython.mem_info())
         if zrh_thread_var.ble_central_run == False:
             # 停止扫描
             bt.gap_scan(None)

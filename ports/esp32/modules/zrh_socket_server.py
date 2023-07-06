@@ -3,6 +3,7 @@ import ujson
 from zrh_response_json import ZrhResponseJson
 from zrh_gpio import do_led
 import zrh_thread_var
+import gc
 
 resJson = ZrhResponseJson()
 text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
@@ -44,10 +45,12 @@ def do_socket():
                     resJson.error("失败,json参数错误")
                 client_socket.send(application_json)
                 client_socket.send(resJson.json())
+                gc.collect()
 
             else:
                 # 其他未知请求，全部拒绝
                 resJson.error("请求被拒绝")
                 client_socket.send(application_json)
                 client_socket.send(resJson.json())
+                gc.collect()
             client_socket.close()
