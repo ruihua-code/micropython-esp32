@@ -4,6 +4,8 @@ import network
 from zrh_wifi_nvs import getWifiNVS
 from zrh_board_led import on_led
 from zrh_socket_server import do_socket
+from zrh_domain import hostname
+
 
 def do_connect(name):
     wlan = network.WLAN(network.STA_IF)
@@ -12,8 +14,8 @@ def do_connect(name):
     while not wlan.active(True):
         print("wait wlan")
 
+    print("hostname:", hostname)
     # 使用域名方式访问（esp.local）
-    hostname = 'esp'
     wlan.config(dhcp_hostname=hostname)
 
     if not wlan.isconnected():
