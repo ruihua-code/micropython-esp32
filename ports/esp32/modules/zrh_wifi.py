@@ -32,7 +32,7 @@ def do_connect(name):
             time.sleep(1)
             connTimeOut += 1
             # 连接网络15秒超时
-            if (connTimeOut >= 15):
+            if (connTimeOut >= 10):
                 print("--- 连接超时 ---")
                 break
         if wlan.isconnected():
