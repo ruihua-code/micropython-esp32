@@ -1,4 +1,6 @@
-html='''
+from micropython import const
+
+html = const('''
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -255,4 +257,4 @@ html='''
   </body>
 </html>
 
-'''
+''')

@@ -1,5 +1,5 @@
 from zrh_wifi_ap import doAp
-import time
+from time import sleep
 import network
 from zrh_wifi_nvs import getWifiNVS
 from zrh_board_led import on_led
@@ -31,7 +31,7 @@ def do_connect(name):
         connTimeOut = 0
         while not wlan.isconnected():
             print("连接失败，正在重新连接...")
-            time.sleep(1)
+            sleep(1)
             connTimeOut += 1
             # 连接网络15秒超时
             if (connTimeOut >= 10):

@@ -15,8 +15,7 @@ def getWifiNVS():
 
 
 # wifi配置信息持久存储
-def setWifiNVS(ssid, password):
-    print("开始写入flash")
+def setWifiNVS(ssid, password):    
     wifiConfig = NVS("WIFI_CONFIG")
     wifiConfig.set_blob("ssid", ssid)
     wifiConfig.set_blob("password", password)

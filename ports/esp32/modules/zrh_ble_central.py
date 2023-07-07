@@ -2,12 +2,11 @@
 扫描指定蓝牙设备
 '''
 import bluetooth
-import time
+from time import sleep
 from micropython import const
 import zrh_thread_var
 from zrh_gpio import do_led
 import gc
-import micropython
 
 _IRQ_SCAN_RESULT = const(5)
 
@@ -27,9 +26,9 @@ def do_ble_central():
         if event == _IRQ_SCAN_RESULT:
             _, addr, _, rssi, _ = data
             # 将地址转换为字符串格式
-            device_address = ":".join("{:02X}".format(b) for b in addr)
-            if _XIAO_MI_MAC == device_address:
-                print("*** find ok ***", device_address, rssi)
+            _device_address = ":".join("{:02X}".format(b) for b in addr)
+            if _XIAO_MI_MAC == _device_address:
+                # print("*** 找到目标设备 ***", _device_address, rssi)
                 if abs(rssi) > 40 and abs(rssi) < 70:
                     do_led(1)
                     # zrh_thread_var.ble_central_run = False
@@ -53,9 +52,9 @@ def do_ble_central():
     # bt.active(False)
 
     while True:
-        time.sleep(2)
+        sleep(2)
         gc.collect()
-        print("mem_info:",micropython.mem_info())
+        # micropython.mem_info()
         if zrh_thread_var.ble_central_run == False:
             # 停止扫描
             bt.gap_scan(None)

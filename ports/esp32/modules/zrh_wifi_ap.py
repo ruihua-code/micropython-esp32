@@ -2,15 +2,15 @@ import socket
 import network
 from zrh_response_json import ZrhResponseJson
 from zrh_wifi_html import html
-import ujson
+from ujson import loads
 import machine
 from zrh_wifi_nvs import setWifiNVS
-import time
+from time import sleep
+from micropython import const
 
 resJson = ZrhResponseJson()
-text_plain = 'HTTP/1.0 200 OK\r\nContent-type: text/plain\r\n\r\n'
-text_html = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
-application_json = 'HTTP/1.0 200 OK\r\nContent-type: application/json\r\n\r\n'
+_text_html =const('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+_application_json =const('HTTP/1.0 200 OK\r\nContent-type: application/json\r\n\r\n')
 
 
 # 解析url里面的ssid和password
@@ -60,15 +60,13 @@ def doAp():
                 print("什么请求都没有")
                 return
             # 请求wifi配置页面
-            if request_method[0] == "GET" and request_method[1] == "/wifi":
-                print("访问wifi配置页面")
-                client_socket.send(text_html)
-                client_socket.send(html)
-                print("页面访问完成")
+            if request_method[0] == "GET" and request_method[1] == "/wifi":                
+                client_socket.send(_text_html)
+                client_socket.send(html)                
 
             elif request_method[0] == 'POST' or request_method[1] == '/cmd':
                 try:
-                    jsonParams = ujson.loads(request_params)
+                    jsonParams = loads(request_params)
                     print("jsonParams cmd:", jsonParams['cmd'])
                     print("params json:", jsonParams)
                     # 检查接口关键key是否存在
@@ -77,10 +75,10 @@ def doAp():
                             setWifiNVS(jsonParams['data']['ssid'],
                                        jsonParams['data']['password'])
                             resJson.success("wifi配置成功")
-                            client_socket.send(application_json)
+                            client_socket.send(_application_json)
                             client_socket.send(resJson.json())
                             client_socket.close()
-                            time.sleep(1)
+                            sleep(1)
                             machine.reset()                        
                         else:
                             resJson.success("成功")
@@ -90,12 +88,12 @@ def doAp():
                 except Exception as e:
                     print("json error", e)
                     resJson.error("失败,json参数错误")
-                client_socket.send(application_json)
+                client_socket.send(_application_json)
                 client_socket.send(resJson.json())
 
             else:
                 # 其他未知请求，全部拒绝
                 resJson.error("请求被拒绝")
-                client_socket.send(application_json)
+                client_socket.send(_application_json)
                 client_socket.send(resJson.json())
             client_socket.close()
