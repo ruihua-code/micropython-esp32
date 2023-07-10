@@ -3,11 +3,11 @@ from time import sleep
 import network
 from zrh_wifi_nvs import getWifiNVS
 from zrh_board_led import on_led
-from zrh_socket_server import do_socket
+
 from zrh_domain import hostname
 
 
-def do_connect(name):
+def do_connect():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
 
@@ -41,7 +41,6 @@ def do_connect(name):
             # wifi连接成功，led长亮
             on_led()
             print('连网成功:', wlan.ifconfig())
-            do_socket()
         else:
             # wifi连接失败,展示红色灯
             # led_pwm_blue = PWM(Pin(5))
