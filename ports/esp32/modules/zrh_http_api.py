@@ -2,7 +2,6 @@ from microdot_asyncio import Microdot
 from zrh_response_json import ZrhResponseJson
 from zrh_gpio import do_led
 from zrh_ble_central import do_ble_central, stop_ble_central
-import uasyncio as asyncio
 
 resJson = ZrhResponseJson()
 app = Microdot()
@@ -17,9 +16,8 @@ async def cmd(request):
         do_led(params['data'])
         resJson.success("成功")
     elif params['cmd'] == "ON_BLE":
-        if params['data']:
-            _loop= asyncio.get_event_loop()
-            _loop.run_until_complete(do_ble_central())
+        if params['data']:            
+            do_ble_central()
             resJson.success("成功")
         else:
             stop_ble_central()

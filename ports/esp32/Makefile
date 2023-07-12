@@ -9,7 +9,7 @@ ifdef BOARD_DIR
 BOARD ?= $(notdir $(BOARD_DIR:/=))
 else
 # If not given on the command line, then default to GENERIC.
-BOARD ?= GENERIC
+BOARD ?= GENERIC_S3
 BOARD_DIR ?= boards/$(BOARD)
 endif
 
@@ -21,7 +21,7 @@ endif
 BUILD ?= build-$(BOARD)
 
 # Device serial settings.
-PORT ?= /dev/cu.usbserial-0001
+PORT ?= /dev/cu.usbserial-1110
 BAUD ?= 115200
 
 PYTHON ?= python3

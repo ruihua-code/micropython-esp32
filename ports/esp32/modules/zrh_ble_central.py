@@ -6,6 +6,7 @@ from micropython import const
 import gc
 import uasyncio as asyncio
 from time import sleep
+from zrh_gpio import do_led
 
 _IRQ_SCAN_RESULT = const(5)
 
@@ -30,9 +31,10 @@ async def start_ble_central():
             if _XIAO_MI_MAC == _device_address:
                 if abs(rssi) > 40 and abs(rssi) < 70:
                     print("*** 找到目标设备 ***", _device_address, rssi)
+                    do_led(1)
                     gc.collect()
                 else:
-                    pass
+                    do_led(0)
 
     # 开始扫描外围设备，每隔1秒扫描1秒时间，无限期扫描
     # duration_ms 要无限期扫描，请将 *duration_ms* 设置为“0”。要停止扫描，请将 *duration_ms* 设置为“None”。
@@ -42,21 +44,24 @@ async def start_ble_central():
     _bt.irq(scan_callback)
     while _bt.active():
         print("ble scaning...", _bt.active(), _task)
-        await asyncio.sleep_ms(50)
+        await asyncio.sleep_ms(500)
 
 
 def stop_ble_central():
-    # _task.cancel()
-    _loop.close()
+    print("stop scan")
     _bt.gap_scan(None)
     # 停止蓝牙模块
     _bt.active(False)
+    print("wait end....")
+    _task.run_until_complete(start_ble_central())
+    _task.cancel()
+    _loop.close()
 
 
-async def do_ble_central():
+def do_ble_central():
     # 创建事件循环对象
     global _loop
     _loop = asyncio.get_event_loop()
     # 运行协程函数
     global _task
-    _task = _loop.run_until_complete(start_ble_central())
+    _task = asyncio.create_task(start_ble_central())

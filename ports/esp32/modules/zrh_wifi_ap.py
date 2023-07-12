@@ -90,6 +90,7 @@ def doAp():
                     resJson.error("失败,json参数错误")
                 client_socket.send(_application_json)
                 client_socket.send(resJson.json())
+                client_socket.close()
 
             else:
                 # 其他未知请求，全部拒绝
